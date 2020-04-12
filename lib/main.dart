@@ -49,7 +49,10 @@ class _MyHomePageState extends State<MyHomePage> {
     buttonPressed = false;
     _makeNetworkRequest();
   }
-
+  void buttonPressedEvent(){
+    buttonPressed = true;
+    setState(() {});
+  }
   void _makeNetworkRequest() async {
     var url =
         'http://slowwly.robertomurray.co.uk/delay/8000/url/http://www.google.co.uk';
@@ -93,10 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: appState==1?Theme.of(context).primaryColor: appState==2?Colors.grey:Theme.of(context).primaryColor,
-        onPressed: () {
-          buttonPressed = true;
-          setState(() {});
-        },
+        onPressed: appState==2 ? null: buttonPressedEvent,
         label: appState==1 ? Text("Make Network Request"): appState==2 ? Text("Awaiting Response"): Text("Response Received"),
 
         icon: appState==1 ? Icon(Icons.call_made) : appState==2?Icon(Icons.access_alarm):Icon(Icons.pause_circle_outline),
