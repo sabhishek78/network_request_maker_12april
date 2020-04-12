@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -29,51 +30,76 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool networkRequestMade=false;
-  String statusCode="Welcome";
-  void _makeNetworkRequest() async{
-    setState(() {
-      networkRequestMade=true;
-    });
-    var url = 'http://slowwly.robertomurray.co.uk/delay/8000/url/http://www.google.co.uk';
+  bool networkRequestComplete = false;
+  String statusCode = "Welcome";
+  bool buttonPressed = false;
+  var appState;
+
+  @override
+  void initState() {
+    super.initState();
+    networkRequestComplete = false;
+    statusCode = "Welcome";
+    buttonPressed = false;
+    _makeNetworkRequest();
+  }
+
+  void _makeNetworkRequest() async {
+    var url =
+        'http://slowwly.robertomurray.co.uk/delay/8000/url/http://www.google.co.uk';
     var response = await http.get(url);
     setState(() {
-      networkRequestMade=false;
-      statusCode=response.statusCode.toString();
+      networkRequestComplete = true;
+      statusCode = response.statusCode.toString();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if(!buttonPressed){
+      appState=1;
+    }
+    else if(buttonPressed && !networkRequestComplete){
+      appState=2;
+    }
+    else if(buttonPressed && networkRequestComplete){
+      appState=3;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Center(
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            networkRequestMade? new CircularProgressIndicator(
+            appState==1 ? Text(
+              "Welcome",
+              style: Theme.of(context).textTheme.display1,
+            ): appState==2 ? CircularProgressIndicator(
               backgroundColor: Colors.red,
             ):Text(
               statusCode,
               style: Theme.of(context).textTheme.display1,
-            ),
+            )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: networkRequestMade?Colors.grey:Theme.of(context).primaryColor,
-        onPressed: networkRequestMade?null:_makeNetworkRequest,
-        tooltip: 'Make Network Request',
-        label: networkRequestMade?Text("Awaiting Response"):Text("Make Network Request"),
-        icon: networkRequestMade?Icon(Icons.pause):Icon(Icons.call_made),
+        backgroundColor: appState==1?Theme.of(context).primaryColor: appState==2?Colors.grey:Theme.of(context).primaryColor,
+        onPressed: () {
+          buttonPressed = true;
+          setState(() {});
+        },
+        label: appState==1 ? Text("Make Network Request"): appState==2 ? Text("Awaiting Response"): Text("Response Received"),
+
+        icon: appState==1 ? Icon(Icons.call_made) : appState==2?Icon(Icons.access_alarm):Icon(Icons.pause_circle_outline),
       ),
     );
   }
